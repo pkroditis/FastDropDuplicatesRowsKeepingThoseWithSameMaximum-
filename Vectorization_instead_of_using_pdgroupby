@@ -1,0 +1,17 @@
+def fast_keep_duplicates_max(df, feature, target):
+    ''' This function finds all the duplicate rows (based on the values in a column) for each batch of 
+        duplicates, keeps only those who have the maximum value. 
+        This is much faster than using pd.groupby: res = df[df['c'] == df.groupby('a')['c'].transform('max')]
+    '''
+
+    df = df.sort_values(by=feature) #ascending sorting based on the feature column
+    id = np.asarray(df[feature])    #transform into np.array from pd.Series
+    data = np.array(df.loc[:,target]) #keep the target value column into the data array
+    _ndx = np.argsort(id) #
+    _id, _pos = np.unique(id[_ndx], return_index=True)
+    g_max = np.maximum.reduceat(data[_ndx], _pos)
+
+    range_index = np.append(_pos, len(id))
+    range_index = np.diff(range_index)
+    max_values = np.repeat(g_max, range_index)
+    return(df[max_values == data])
